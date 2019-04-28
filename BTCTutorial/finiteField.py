@@ -14,7 +14,7 @@ class FieldElement:
     An object to do finite field math.
     """
 
-    typehint = Union[int, FieldElement]
+    typehintunion = Union[int, FieldElement]
 
     def __init__(self, num: int, prime: int):
 
@@ -62,27 +62,27 @@ class FieldElement:
         return not self == other
 
     @_ensureField
-    def __add__(self, other: typehint) -> FieldElement:
+    def __add__(self, other: typehintunion) -> FieldElement:
         num = (self._num + other._num) % self._prime
         return self.__class__(num, self._prime)
 
     @_ensureField
-    def __sub__(self, other: typehint) -> FieldElement:
+    def __sub__(self, other: typehintunion) -> FieldElement:
         num = (self._num - other._num) % self._prime
         return self.__class__(num, self._prime)
 
     @_ensureField
-    def __mul__(self, other: typehint) -> FieldElement:
+    def __mul__(self, other: typehintunion) -> FieldElement:
         num = (self._num * other._num) % self._prime
         return self.__class__(num, self._prime)
 
     @_ensureField
-    def __pow__(self, other: typehint) -> FieldElement:
+    def __pow__(self, other: typehintunion) -> FieldElement:
         num = pow(self._num, other._num, self._prime)
         return self.__class__(num, self._prime)
 
     @_ensureField
-    def __floordiv__(self, other: typehint) -> FieldElement:
+    def __floordiv__(self, other: typehintunion) -> FieldElement:
         num = (self._num * pow(other._num, self._prime - 2, self._prime)) % self._prime
         return self.__class__(num, self._prime)
 
