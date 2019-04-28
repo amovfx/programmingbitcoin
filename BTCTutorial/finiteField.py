@@ -11,7 +11,7 @@ import unittest
 
 class FieldElement:
     """
-    An object to do finite field math.
+    An object to do finite field element math.
     """
 
     typehintunion = Union[int, FieldElement]
@@ -23,6 +23,7 @@ class FieldElement:
         else:
             raise ValueError(f'{prime} is not a prime number.')
 
+        #maybe auto convert?
         if num > self._prime or num < 0:
             raise ValueError(f'{num} is outside the range of 0 and self.prime')
         else:
@@ -44,7 +45,6 @@ class FieldElement:
                     raise ValueError(f'Fields must match. {field1._prime} != {other._prime}')
             else:
                 raise ValueError("Second argument must be an int or a FieldElement.")
-
 
             return func(field1, other)
         return wrapped
@@ -86,6 +86,11 @@ class FieldElement:
         num = (self._num * pow(other._num, self._prime - 2, self._prime)) % self._prime
         return self.__class__(num, self._prime)
 
+    @_ensureField
+    def __truediv__(self, other: typehintunion) -> FieldElement:
+        raise Warning("True division defaults to integer division.")
+        return self // other
+
     def __repr__(self):
         return f'<{self.__class__.__name__} {self._num} f{self._prime} >'
 
@@ -98,11 +103,3 @@ class FieldElementTest(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertTrue(a != c)
         self.assertFalse(a != a)
-
-
-
-
-A = FieldElement(3,19)
-A
-B = FieldElement(18, 19)
-A ** 2
