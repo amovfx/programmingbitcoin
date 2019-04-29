@@ -14,7 +14,7 @@ class FieldElement:
     An object to do finite field element math.
     """
 
-    typehintunion = Union[int, FieldElement]
+    typehintunion = Union[int, 'FieldElement']
 
     def __init__(self, num: int, prime: int):
 
@@ -88,7 +88,7 @@ class FieldElement:
 
     @_ensureField
     def __truediv__(self, other: typehintunion) -> FieldElement:
-        raise Warning("True division defaults to integer division.")
+        #raise Warning("True division defaults to integer division.")
         return self // other
 
     def __repr__(self):
@@ -103,3 +103,56 @@ class FieldElementTest(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertTrue(a != c)
         self.assertFalse(a != a)
+
+    def test_eq(self):
+        a = FieldElement(5, 19)
+        b = FieldElement(5,19)
+        c = FieldElement(6, 19)
+        self.assertEqual(a, b)
+        self.assertTrue(a == b)
+        self.assertFalse(a == c)
+
+    def test_add(self):
+        a = FieldElement(6, 17)
+        b = FieldElement(7, 17)
+        c = FieldElement(13, 17)
+        self.assertEqual(a + b, c)
+        self.assertEqual(a + 7, c)
+
+    def test_sub(self):
+        a = FieldElement(15, 17)
+        b = FieldElement(5, 17)
+        c = FieldElement(10, 17)
+        self.assertEqual(a - b, c)
+        self.assertEqual(a - 5, c)
+
+    def test_mul(self):
+        a = FieldElement(2, 17)
+        b = FieldElement(3, 17)
+        c = FieldElement(6, 17)
+        self.assertEqual(a*b, c)
+        self.assertEqual(a*3, c)
+
+    def test_pow(self):
+        a = FieldElement(2, 17)
+        b = FieldElement(3, 17)
+        c = FieldElement(8, 17)
+        self.assertEqual(a**b, c)
+        self.assertEqual(a**3, c)
+
+    def test_floordiv(self):
+        a = FieldElement(15, 17)
+        b = FieldElement(5, 17)
+        c = FieldElement(3, 17)
+        self.assertEqual(a // b, c)
+        self.assertEqual(a // 5, c)
+
+    def test_truediv(self):
+        a = FieldElement(15, 17)
+        b = FieldElement(5, 17)
+        c = FieldElement(3, 17)
+        self.assertEqual(a / b, c)
+        self.assertEqual(a / 5, c)
+
+if __name__ == "__main__":
+    unittest.main()
