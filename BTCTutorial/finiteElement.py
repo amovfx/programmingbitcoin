@@ -17,6 +17,7 @@ class FieldElement:
 
     def __init__(self, num: int, prime: int):
 
+        #todo: make sure this is operable for the FiniteField class.
         if prime > 1 and all(prime % i for i in islice(count(2), int(sqrt(prime) - 1))):
             self._prime = prime
         else:
