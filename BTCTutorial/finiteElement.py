@@ -7,6 +7,8 @@ from itertools import count, islice
 
 import unittest
 
+from .finiteField import FiniteField
+
 
 class FieldElement:
     """
@@ -15,13 +17,17 @@ class FieldElement:
 
     typehintunion = Union[int, 'FieldElement']
 
-    def __init__(self, num: int, prime: int):
+    def __init__(self, num: int, prime=None):
 
-        #todo: make sure this is operable for the FiniteField class.
-        if prime > 1 and all(prime % i for i in islice(count(2), int(sqrt(prime) - 1))):
-            self._prime = prime
+        if prime is not None:
+            """Set the prime value of the FiniteField singleton."""
+            finiteField = FiniteField(prime)
         else:
-            raise ValueError(f'{prime} is not a prime number.')
+            #warning you are creating a default field.
+            finiteField = FiniteField()
+
+        self._prime = finiteField.getPrime()
+
 
         #maybe auto convert?
         if num > self._prime or num < 0:
