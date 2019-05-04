@@ -6,8 +6,10 @@ from math import sqrt
 from itertools import count, islice
 
 import unittest
+import logging
+#logging.basicConfig(level=logging.DEBUG)
 
-from .finiteField import FiniteField
+from BTCTutorial.finiteField import FiniteField
 
 
 class FieldElement:
@@ -19,24 +21,18 @@ class FieldElement:
 
     def __init__(self, num: int, prime=None):
 
-        if prime is not None:
-            """Set the prime value of the FiniteField singleton."""
-            finiteField = FiniteField(prime)
+        self._ensureFiniteField()
+        self.setNum(num)
+
+    def _ensureFiniteField(self):
+        logging.debug("Creating FieldElement.",exc_info=True)
+        if FiniteField.instance == None:
+            logging.debug("Creating FiniteField", exc_info=True)
+            FiniteField()
         else:
-            #warning you are creating a default field.
-            finiteField = FiniteField()
+            logging.debug(f"Element in {FiniteField()}")
 
-        self._prime = finiteField.getPrime()
-
-
-        #maybe auto convert?
-        if num > self._prime or num < 0:
-            raise ValueError(f'{num} is outside the range of 0 and self.prime')
-        else:
-            self._num = num
-
-
-    def _ensureField(func):
+    def _ensureFieldElementArg(func):
         """
         Wrapper for class functions to check if _prime variable matches. This also converts ints to FIniteFIelds
         :return:
@@ -45,60 +41,83 @@ class FieldElement:
         def wrapped(field1: FieldElement, other):
 
             if isinstance(other, int):
-                other = FieldElement(other, field1._prime)
-            elif isinstance(other, FieldElement):
-                if field1._prime != other._prime:
-                    raise ValueError(f'Fields must match. {field1._prime} != {other._prime}')
-            else:
-                raise ValueError("Second argument must be an int or a FieldElement.")
-
+                other = FieldElement(other, field1.getPrime())
             return func(field1, other)
         return wrapped
 
 
-
-    @_ensureField
+    @_ensureFieldElementArg
     def __eq__(self, other: FieldElement) -> bool:
-        return self._num == other._num and self._prime == other._prime
+        return self._num == other._num and self.getPrime() == other.getPrime()
 
-    @_ensureField
+    @_ensureFieldElementArg
     def __ne__(self, other: FieldElement) -> bool:
         if other is None:
             return False
         return not self == other
 
-    @_ensureField
+    @_ensureFieldElementArg
+    def __lt__(self, other):
+        return (self._num < other._num)
+
+    @_ensureFieldElementArg
+    def __gt__(self, other):
+        return (self._num > other._num)
+
+    @_ensureFieldElementArg
     def __add__(self, other: typehintunion) -> FieldElement:
-        num = (self._num + other._num) % self._prime
-        return self.__class__(num, self._prime)
+        num = (self._num + other._num) % self.getPrime()
+        return self.__class__(num, self.getPrime())
 
-    @_ensureField
+    @_ensureFieldElementArg
     def __sub__(self, other: typehintunion) -> FieldElement:
-        num = (self._num - other._num) % self._prime
-        return self.__class__(num, self._prime)
+        num = (self._num - other._num) % self.getPrime()
+        return self.__class__(num, self.getPrime())
 
-    @_ensureField
+    @_ensureFieldElementArg
     def __mul__(self, other: typehintunion) -> FieldElement:
-        num = (self._num * other._num) % self._prime
-        return self.__class__(num, self._prime)
+        num = (self._num * other._num) % self.getPrime()
+        return self.__class__(num, self.getPrime())
 
-    @_ensureField
+    @_ensureFieldElementArg
     def __pow__(self, other: typehintunion) -> FieldElement:
-        num = pow(self._num, other._num, self._prime)
-        return self.__class__(num, self._prime)
+        num = pow(self._num, other._num, self.getPrime())
+        return self.__class__(num, self.getPrime())
 
-    @_ensureField
+    @_ensureFieldElementArg
     def __floordiv__(self, other: typehintunion) -> FieldElement:
-        num = (self._num * pow(other._num, self._prime - 2, self._prime)) % self._prime
-        return self.__class__(num, self._prime)
+        num = (self._num * pow(other._num, self.getPrime() - 2, self.getPrime())) % self.getPrime()
+        return self.__class__(num, self.getPrime())
 
-    @_ensureField
+    @_ensureFieldElementArg
     def __truediv__(self, other: typehintunion) -> FieldElement:
         #raise Warning("True division defaults to integer division.")
         return self // other
 
+    @_ensureFieldElementArg
+    def __mod__(self, other):
+        return self._num % other._num
+
     def __repr__(self):
-        return f'<{self.__class__.__name__} {self._num} f{self._prime} >'
+        return f'<{self.__class__.__name__} {self._num} f{self.getPrime()} >'
+
+    #public methods
+
+    def setNum(self, num):
+        # maybe auto convert?
+        if num > self.getPrime() or num < 0:
+            raise ValueError(f'{num} is outside the range of 0 and self.prime')
+        else:
+            self._num = num
+
+    def getNum(self):
+        return self._num
+
+    def setPrime(self, prime):
+        FiniteField().setPrime(prime)
+
+    def getPrime(self):
+        return FiniteField().getPrime()
 
 
 class FieldElementTest(unittest.TestCase):
@@ -161,5 +180,10 @@ class FieldElementTest(unittest.TestCase):
         self.assertEqual(a / b, c)
         self.assertEqual(a / 5, c)
 
+    def test_FiniteField(self):
+        #todo: impliment this
+        pass
+
 if __name__ == "__main__":
+
     unittest.main()
