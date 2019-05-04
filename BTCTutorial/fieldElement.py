@@ -23,6 +23,8 @@ class FieldElement:
 
         self._ensureFiniteField()
         self.setNum(num)
+        if prime is not None:
+            self.setPrime(prime)
 
     def _ensureFiniteField(self):
         logging.debug("Creating FieldElement.",exc_info=True)
