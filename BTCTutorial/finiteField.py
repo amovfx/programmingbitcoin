@@ -10,7 +10,9 @@ import unittest
 #todo annotate with comments
 
 class FiniteField:
-    """Finite Field is a Singleton to contain a prime value to limit the field for future classes."""
+    """Finite Field is a Singleton to contain a prime value to limit the field for future classes.
+    Classes FieldElement and FieldPoint all call this singleton to force the prime into the same field.
+    This is an experiment to lock the field value across all program operations."""
     class __FiniteField:
         def __init__(self, prime):
             self.setPrime(prime)
@@ -32,25 +34,15 @@ class FiniteField:
     instance = None
 
     def __new__(cls, prime=None):
-
-
         """Create singleton"""
         if FiniteField.instance is None:
             if prime is None:
-                Warning("prime value defaulting to 17.")
                 prime = 17
             FiniteField.instance = FiniteField.__FiniteField(prime)
-        else:
-            FiniteField.instance.setPrime(prime)
         return FiniteField.instance
-
-
 
     def __getttr__(self, name):
         return getattr(self.instance, name)
-
-    def __setattr__(self, name):
-        return setattr(self.instance, name)
 
 
 
