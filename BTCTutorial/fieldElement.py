@@ -24,7 +24,11 @@ class FieldElement:
         self._ensureFiniteField()
         self.setNum(num)
         if prime is not None:
+            print(f"setting prime: {prime}")
             self.setPrime(prime)
+        else:
+            self._prime = None
+
 
     def _ensureFiniteField(self):
         logging.debug("Creating FieldElement.",exc_info=True)
@@ -43,14 +47,14 @@ class FieldElement:
         def wrapped(field1: FieldElement, other):
 
             if isinstance(other, int):
-                other = FieldElement(other, field1.getPrime())
+                other = FieldElement(other)
             return func(field1, other)
         return wrapped
 
 
     @_ensureFieldElementArg
     def __eq__(self, other: FieldElement) -> bool:
-        return self._num == other._num and self.getPrime() == other.getPrime()
+        return (self._num == other.getNum())
 
     @_ensureFieldElementArg
     def __ne__(self, other: FieldElement) -> bool:
@@ -101,7 +105,7 @@ class FieldElement:
         return self._num % other._num
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {self._num} f{self.getPrime()} >'
+        return f'<{self.__class__.__name__} {self._num} f{FiniteField().getPrime()} >'
 
     #public methods
 
@@ -116,10 +120,13 @@ class FieldElement:
         return self._num
 
     def setPrime(self, prime):
-        FiniteField().setPrime(prime)
+        self._prime = prime
 
     def getPrime(self):
-        return FiniteField().getPrime()
+        if self._prime is None:
+            return FiniteField().getPrime()
+        else:
+            return self._prime
 
 
 class FieldElementTest(unittest.TestCase):
@@ -141,9 +148,10 @@ class FieldElementTest(unittest.TestCase):
         self.assertFalse(a == c)
 
     def test_add(self):
-        a = FieldElement(6, 17)
-        b = FieldElement(7, 17)
-        c = FieldElement(13, 17)
+        FieldElement(17)
+        a = FieldElement(6)
+        b = FieldElement(7)
+        c = FieldElement(13)
         self.assertEqual(a + b, c)
         self.assertEqual(a + 7, c)
 
