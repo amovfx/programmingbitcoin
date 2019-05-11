@@ -125,7 +125,7 @@ class FiniteField(object):
         def setNum(self, num):
             """Set num if it is in the proper field range."""
             if num > self.getPrime() or num < 0:
-                raise ValueError(f'{num} is outside the range of 0 and {self.prime}')
+                raise ValueError(f'{num} is outside the range of 0 and {self.getPrim()}')
             else:
                 self._num = num
 
