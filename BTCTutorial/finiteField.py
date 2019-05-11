@@ -21,6 +21,8 @@ class FiniteFieldObject(object):
 
 class FiniteFieldElement(object):
 
+    """Base class for FIniteField Factory to create FInite Element objects."""
+
     _bounds = None
     @classmethod
     def getBounds(cls):
@@ -139,7 +141,15 @@ class FiniteField(object):
 
     @property
     def Element(self):
-        #Create a field Element class
+
+        """This returns a class with bounds set. All instances of this object will work correctly together.
+
+        Returns(FiniteFieldElement):
+            A dynamicaly created class so all instances of this class can share a unique bound attribute.
+            This allows to create multiple objects in different fields.
+
+        """
+
         fieldElement = type(f"FieldElement{self._bounds}", (FiniteFieldElement, object), dict(self._FieldElement.__dict__))
         fieldElement.setBounds(self._bounds)
         return fieldElement
