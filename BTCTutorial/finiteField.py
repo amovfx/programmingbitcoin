@@ -1,71 +1,157 @@
-#Copyright dwetfyw
-
 from __future__ import annotations
-
-from math import sqrt
-from itertools import count, islice
+from typing import Union
+from functools import wraps
 
 import unittest
+import logging
+#logging.basicConfig(level=logging.DEBUG)
 
-#todo annotate with comments
 
-class FiniteField:
-    """Finite Field is a Singleton to contain a prime value to limit the field for future classes.
-    Classes FieldElement and FieldPoint all call this singleton to force the prime into the same field.
-    This is an experiment to lock the field value across all program operations."""
-    class __FiniteField:
-        def __init__(self, prime):
-            self.setPrime(prime)
+
+typehintunion = Union[int, 'FieldElement']
+
+
+class FiniteFieldObject(object):
+    """Object for all finite element derivitives to inherit from."""
+    def __init__(self, bounds):
+        self._bounds = bounds
+
+    def getBounds(self):
+        return self._bounds
+
+class FiniteFieldElement(object):
+
+    _bounds = None
+    @classmethod
+    def getBounds(cls):
+        return cls._bounds
+
+    @classmethod
+    def setBounds(cls, bounds):
+        cls._bounds = bounds
+
+class FiniteField(object):
+    """
+    This field object sets the bounds of the finite field and is also a factory
+    for element class appropriate to that field.
+    """
+
+    class _FieldElement(FiniteFieldElement):
+        """An element of the finite field. This object provides the mathematical
+        operations for the field elements."""
+
+        def __init__(self, num: int):
+            self.setNum(num)
+
+        def _ensureFieldElementArg(func):
+            """
+            Converts int arguments to the class type of field1.
+            Arguments:
+                func:
+                    function to wrap.
+            Returns(fn):
+                wrapped function with int argument converted.
+
+            """
+
+            @wraps(func)
+            def wrapped_f(field1: FiniteFieldObject, other):
+                if isinstance(other, int):
+                    other = field1.__class__(other)
+                return func(field1, other)
+
+            return wrapped_f
+
+        @_ensureFieldElementArg
+        def __eq__(self, other: FiniteField._FieldElement) -> bool:
+            return self.getNum() == other.getNum()
+
+        @_ensureFieldElementArg
+        def __ne__(self, other: FiniteField._FieldElement) -> bool:
+            if other is None:
+                return False
+            return not self == other
+
+        @_ensureFieldElementArg
+        def __lt__(self, other):
+            return self.getNum() < other.getNum()
+
+        @_ensureFieldElementArg
+        def __gt__(self, other):
+            return self.getNum() > other.getNum()
+
+        @_ensureFieldElementArg
+        def __add__(self, other: typehintunion) -> FiniteField._FieldElement:
+            num = (self.getNum() + other.getNum()) % self.getPrime()
+            return self.__class__(num)
+
+        @_ensureFieldElementArg
+        def __sub__(self, other: typehintunion) -> FiniteField._FieldElement:
+            num = (self.getNum() - other.getNum()) % self.getPrime()
+            return self.__class__(num)
+
+        @_ensureFieldElementArg
+        def __mul__(self, other: typehintunion) -> FiniteField._FieldElement:
+            num = (self.getNum() * other.getNum()) % self.getPrime()
+            return self.__class__(num)
+
+        @_ensureFieldElementArg
+        def __pow__(self, other: typehintunion) -> FiniteField._FieldElement:
+            num = pow(self.getNum(), other.getNum(), self.getPrime())
+            return self.__class__(num)
+
+        @_ensureFieldElementArg
+        def __floordiv__(self, other: typehintunion) -> FiniteField._FieldElement:
+            num = (self.getNum() * pow(other.getNum(), self.getPrime() - 2, self.getPrime())) % self.getPrime()
+            return self.__class__(num)
+
+        @_ensureFieldElementArg
+        def __truediv__(self, other: typehintunion) -> FiniteField._FieldElement:
+            # raise Warning("True division defaults to integer division.")
+            return self // other
+
+        @_ensureFieldElementArg
+        def __mod__(self, other):
+            return self.getNum() % other.getNum()
 
         def __repr__(self):
-            return f"<FiniteField ({self.getPrime()}) >"
+            # return f'<{self.__class__.__name__} {self.getNum()}} >'
+            return f'<FieldElement {self.getNum()} f{self.getPrime()}>'
 
-        def getPrime(self):
-            return self._prime
+        # public methods
 
-        def setPrime(self, prime):
-            """Filter for prime numbers """
-            if prime > 1 and all(prime % i for i in islice(count(2), int(sqrt(prime) - 1))):
-                self._prime = prime
+        def setNum(self, num):
+            """Set num if it is in the proper field range."""
+            if num > self.getPrime() or num < 0:
+                raise ValueError(f'{num} is outside the range of 0 and {self.prime}')
             else:
-                raise ValueError(f'{prime} is not prime')
+                self._num = num
+
+        def getNum(self):
+            return self._num
+
+        @classmethod
+        def getPrime(cls):
+            return cls.getBounds()
+
+    def __init__(self, prime):
+        self._bounds = prime
+
+    @property
+    def Element(self):
+        #Create a field Element class
+        fieldElement = type(f"FieldElement{self._bounds}", (FiniteFieldElement, object), dict(self._FieldElement.__dict__))
+        fieldElement.setBounds(self._bounds)
+        return fieldElement
+
+    def __call__(self, num):
+        return self.Element(num)
 
 
-    instance = None
-
-    def __new__(cls, prime=None):
-        """Create singleton"""
-        if FiniteField.instance is None:
-            if prime is None:
-                prime = 17
-            FiniteField.instance = FiniteField.__FiniteField(prime)
-        return FiniteField.instance
-
-    def __getttr__(self, name):
-        return getattr(self.instance, name)
 
 
 
-class FiniteFieldTest(unittest.TestCase):
-    """Various unit testing for the FiniteField class."""
 
-    def test_prime(self):
-        #print ("Testing non prime")
-        with self.assertRaises(ValueError):
-            nonPrimeField = FiniteField(16)
 
-    def test_functions(self):
-        primeField = FiniteField(17)
-        self.assertEqual(17, primeField._prime)
-        self.assertEqual(17, primeField.getPrime())
 
-    def test_Simpleton(self):
-        primeField = FiniteField(23)
-        self.assertNotEqual(17, primeField.getPrime())
 
-    def test_NoDefault(self):
-        primeField = FiniteField()
-        print (primeField.getPrime())
-
-if __name__ == "__main__":
-    unittest.main()
