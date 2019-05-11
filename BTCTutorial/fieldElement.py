@@ -136,7 +136,7 @@ class FiniteField(object):
                 return cls.makeFieldElement(prime)
 
     @classmethod
-    def makeFieldElement(cls, prime:int):
+    def makeFieldElement(cls, prime: int):
         """
         Makes a specific _FieldElement class with a unique prime member that has all available math operations to function in the FiniteField.
         Args:
@@ -154,17 +154,12 @@ class FiniteField(object):
 
 
     def __repr__(self):
-        return f'<PrimeField{self.prime}>'
+        return f'<FiniteField>'
 
 class FiniteElement(FiniteField):
     def __new__(cls, x, prime=None):
         "Returns a FieldElement"
         return super().__new__(cls, x, prime=prime)(x)
-
-
-
-
-
 
 class FieldElementTest(unittest.TestCase):
 
