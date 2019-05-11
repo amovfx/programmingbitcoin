@@ -155,6 +155,7 @@ class FiniteField(object):
         return fieldElement
 
     def __call__(self, num):
+        """Quick method to return an instanced FieldElement"""
         return self.Element(num)
 
 
