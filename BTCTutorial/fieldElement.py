@@ -6,7 +6,7 @@ import unittest
 import logging
 #logging.basicConfig(level=logging.DEBUG)
 
-from BTCTutorial.finiteField import FiniteField
+
 from collections import OrderedDict
 
 
@@ -36,6 +36,7 @@ class _FieldElement(object):
         def wrapped_f(field1: _FieldElement, other):
             if isinstance(other, int):
                 other = field1.__class__(other)
+                print (field1)
             return func(field1, other)
 
         return wrapped_f
@@ -104,10 +105,11 @@ class _FieldElement(object):
         if num > self.getPrime() or num < 0:
             raise ValueError(f'{num} is outside the range of 0 and self.prime')
         else:
-            self.__num = num
+            self._num = num
+
 
     def getNum(self):
-        return self.getNum()
+        return self._num
 
     @classmethod
     def getPrime(cls):
@@ -197,6 +199,7 @@ class FieldElementTest(unittest.TestCase):
         a = FE17(6)
         b = FE17(7)
         c = FE17(13)
+        print (c)
         self.assertEqual(a + b, c)
         self.assertEqual(a + 7, c)
 
@@ -217,13 +220,14 @@ class FieldElementTest(unittest.TestCase):
         self.assertEqual(a*3, c)
 
     def test_pow(self):
-        a = FE17(2)
-        b = FE17(3)
-        c = FE17(8)
+        a = FiniteElement(2,17)
+        b = FiniteElement(3,17)
+        c = FiniteElement(8,17)
         self.assertEqual(a**b, c)
         self.assertEqual(a**3, c)
 
     def test_floordiv(self):
+        FE17 = FiniteField.makeFieldElement(17)
         a = FE17(15)
         b = FE17(5)
         c = FE17(3)
@@ -231,6 +235,7 @@ class FieldElementTest(unittest.TestCase):
         self.assertEqual(a // 5, c)
 
     def test_truediv(self):
+        FE17 = FiniteField.makeFieldElement(17)
         a = FE17(15)
         b = FE17(5)
         c = FE17(3)
